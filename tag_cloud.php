@@ -1,34 +1,33 @@
 <?php
 /*
 	Example Usage:
-	$config = array( // these values are all optional
+	$options = array( // these values are all optional
 		'min_font_em' => 1,
 		'max_font_em' => 3,
 		'base_url' => '/tag/'
 	);
-	$tagger = new Tags($config);
-	$tagger->cloud($tags); // This returns links with font-sizes ranging from the min and max font em specified.
+	$tagger = new Tag_Cloud($options);
+	echo $tagger->cloud($tags); // This returns links with font-sizes ranging from the min and max font em specified.
 	Example Ouput: <a href="base_url/tag_name" style="font-size: 1.2em;">tag_name</a>
 	
 */
 
-class Tags
+class Tag_Cloud
 {
-
-	private $min_font_em        =   1;
-	private $max_font_em        =   3;
-	private $base_url			= 	'/tag/';
-
-	public function __construct($config = array()) {
-		$this->set_config($config);
+	private $options = array(
+		'min_font_em' => 1,
+		'max_font_em' => 3,
+		'base_url' => '/tag/'
+	);
+	
+	public function __construct($options = array())
+	{
+		$this->set_options($options);
 	}
 
-	public function set_config($config = array()) {
-		foreach ($config as $k => $v)
-		{
-			if (isset($this->$k) || is_null($this->$k))
-				$this->$k = $v;
-		}
+	public function set_options($options = array())
+	{
+		$this->options = $this->arr_overwrite($this->options, $options);
 	}
 
 	/*
@@ -41,7 +40,7 @@ class Tags
 	);
 	*/
 
-    public function cloud($tags = array())
+    public function cloud($tags)
     {
 		// grab only unique tag counts
 		$tag_counts = array_values(array_unique(array_map('array_shift', $tags)));
@@ -61,7 +60,7 @@ class Tags
 		foreach ($tags as $tag)
 		{
 			list($tag_count, $name) = $tag;
-			$tags_html[] = '<a href="' . $this->base_url . htmlspecialchars($name) . '" style="font-size: ' . $tag_sizes[$tag_count] . 'em;">' . htmlspecialchars($name) . '</a>';
+			$tags_html[] = '<a href="' . $this->options['base_url'] . htmlspecialchars($name) . '" style="font-size: ' . $tag_sizes[$tag_count] . 'em;">' . htmlspecialchars($name) . '</a>';
 		}
 
 		return implode("\n", $tags_html);
@@ -72,11 +71,19 @@ class Tags
 	private function get_font_em($position, $tag_counts_total)
 	{
 		$weight = $tag_counts_total ? $position / $tag_counts_total : 0;
-		$em = ($weight * ($this->max_font_em - $this->min_font_em)) + $this->min_font_em;
+		$em = ($weight * ($this->options['max_font_em'] - $this->options['min_font_em'])) + $this->options['min_font_em'];
 
 		return round($em, 1);
 	}
 
-}
+	private static function arr_overwrite($arr1, $arr2)
+	{
+		foreach (array_intersect_key($arr2, $arr1) as $k => $v)
+		{
+			$arr1[$k] = $v;
+		}
 
-?>
+		return $arr1;
+	}
+
+}

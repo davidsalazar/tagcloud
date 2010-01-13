@@ -1,10 +1,10 @@
 Sample Usage:
-$config = array( // these values are all optional
+$options = array( // these values are all optional
 	'min_font_em' => 1,
 	'max_font_em' => 3,
 	'base_url' => '/tag/'
 );
-$tagger = new Tags($config);
+$tagger = new Tag_Cloud($options);
 
 // First two values for each array must follow this format. [0] = tag count, [1] = tag name
 $tags = array(
